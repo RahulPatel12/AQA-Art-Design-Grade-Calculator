@@ -172,10 +172,41 @@
         flex-direction: column;
       }
     }
+
+    /* Countdown Timer Styles */
+    .countdown-container {
+      background-color: #f8d7da;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 30px;
+      text-align: center;
+      border-left: 5px solid #dc3545;
+    }
+
+    .countdown-title {
+      color: #dc3545;
+      margin-bottom: 10px;
+      font-size: 1.4rem;
+    }
+
+    .countdown-timer {
+      color: #dc3545;
+      font-size: 2.2rem;
+      font-weight: 700;
+      font-family: monospace;
+      margin: 10px 0;
+    }
   </style>
 </head>
 <body>
 <div class="container">
+
+  <!-- Countdown Timer -->
+  <div class="countdown-container">
+    <h2 class="countdown-title">Time Remaining:</h2>
+    <div id="countdown" class="countdown-timer"></div>
+  </div>
+
   <h1>AQA A Level Art and Design Grade Calculator</h1>
 
   <form class="calculator-form" id="gradeCalculatorForm">
@@ -475,6 +506,30 @@
 
   // Initialize the app - populate module options when page loads
   populateModuleOptions();
+
+  // Countdown Timer
+  function updateCountdown() {
+    const targetDate = new Date('2025-05-16T12:00:00');
+    const now = new Date();
+    const diff = targetDate - now;
+
+    if (diff <= 0) {
+      document.getElementById('countdown').textContent = "Results are live!";
+      return;
+    }
+
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+    document.getElementById('countdown').textContent =
+            `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  }
+
+  // Update the countdown every second
+  updateCountdown();
+  setInterval(updateCountdown, 1000);
+
 </script>
 </body>
 </html>
