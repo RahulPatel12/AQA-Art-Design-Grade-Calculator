@@ -3,6 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Confetti and Sound Effects -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <audio id="clappingSound" preload="auto">
+    <source src="https://www.fesliyanstudios.com/play-mp3/2650" type="audio/mp3">
+    <!-- Backup source -->
+    <source src="https://www.soundjay.com/human/applause-01.mp3" type="audio/mp3">
+    Your browser does not support the audio element.
+  </audio>
+
   <title>AQA A Level Art and Design Grade Calculator</title>
   <style>
     :root {
@@ -445,6 +455,88 @@
     };
   }
 
+  // Play confetti effect
+  function playConfetti() {
+    // Create a multi-colored confetti effect
+    const count = 200;
+    const defaults = {
+      origin: { y: 0.7 },
+      spread: 90,
+      ticks: 100,
+      gravity: 1.2,
+      scalar: 1.2,
+      drift: 0
+    };
+
+    // Launch multiple batches of confetti for a richer effect
+    function fire(particleRatio, opts) {
+      confetti({
+        ...defaults,
+        ...opts,
+        particleCount: Math.floor(count * particleRatio)
+      });
+    }
+
+    // Launch confetti in sequence with different colors
+    fire(0.25, { spread: 26, startVelocity: 55, colors: ['#ff0000', '#ffa500'] });
+    fire(0.2, { spread: 60, colors: ['#00ff00', '#0000ff'] });
+    fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8, colors: ['#ffff00', '#ff00ff'] });
+    fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92, scalar: 1.2, colors: ['#00ffff', '#ffffff'] });
+    fire(0.1, { spread: 120, startVelocity: 45, colors: ['#ff9999', '#99ff99', '#9999ff'] });
+  }
+
+  // Play clapping sound for only 3 seconds
+  function playClappingSound() {
+    const sound = document.getElementById('clappingSound');
+
+    // Reset and prepare the sound
+    sound.pause();
+    sound.currentTime = 0;
+
+    // Set volume to a good level
+    sound.volume = 0.7;
+
+    // Play the sound
+    const playPromise = sound.play();
+
+    if (playPromise !== undefined) {
+      playPromise.then(() => {
+        // Sound started playing successfully
+
+        // Stop the sound after 3 seconds
+        setTimeout(() => {
+          sound.pause();
+          sound.currentTime = 0;
+        }, 3000); // 3000 milliseconds = 3 seconds
+
+      }).catch(error => {
+        console.log('Audio playback blocked:', error);
+
+        // Create a play button if autoplay is blocked
+        const audioBtn = document.createElement('button');
+        audioBtn.textContent = '🔊 Play Applause';
+        audioBtn.className = 'audio-btn';
+        audioBtn.style.cssText = 'background: #27ae60; color: white; border: none; padding: 8px 16px; border-radius: 4px; margin: 10px auto; display: block; cursor: pointer;';
+
+        audioBtn.onclick = function() {
+          // Play sound for 3 seconds when button is clicked
+          sound.play();
+          setTimeout(() => {
+            sound.pause();
+            sound.currentTime = 0;
+          }, 3000);
+
+          this.disabled = true;
+          this.textContent = '🎵 Playing...';
+          setTimeout(() => this.remove(), 3500);
+        };
+
+        // Add button to results section
+        document.getElementById('results').prepend(audioBtn);
+      });
+    }
+  }
+
   // Handle form submission
   form.addEventListener('submit', function(e) {
     e.preventDefault();
@@ -502,6 +594,10 @@
 
     // Show results section
     results.classList.add('visible');
+
+    // Play confetti and sound effects
+    playConfetti();
+    playClappingSound();
   });
 
   // Initialize the app - populate module options when page loads
