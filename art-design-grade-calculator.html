@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AQA A Level Art and Design Grade Calculator</title>
+    <style>
+        :root {
+            --primary: #1a5276;
+            --secondary: #2980b9;
+            --light: #f4f6f7;
+            --dark: #2c3e50;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --danger: #c0392b;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--light);
+            color: var(--dark);
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+        
+        .calculator-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        label {
+            font-weight: 500;
+            color: var(--dark);
+        }
+        
+        select, input {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        select:focus, input:focus {
+            border-color: var(--secondary);
+            outline: none;
+        }
+        
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-weight: 500;
+        }
+        
+        button:hover {
+            background-color: var(--secondary);
+        }
+        
+        .results {
+            margin-top: 30px;
+            display: none;
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 5px solid var(--primary);
+        }
+        
+        .results.visible {
+            display: block;
+        }
+        
+        .results h2 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+        
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .result-item:last-child {
+            border-bottom: none;
+        }
+        
+        .result-label {
+            font-weight: 500;
+        }
+        
+        .grade {
+            font-size: 2rem;
+            font-weight: 700;
+            text-align: center;
+            margin: 20px 0;
+            color: var(--primary);
+        }
+        
+        .boundaries {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            gap: 20px;
+        }
+        
+        .boundary {
+            flex: 1;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .lower-boundary {
+            background-color: rgba(241, 148, 138, 0.2);
+        }
+        
+        .upper-boundary {
+            background-color: rgba(130, 224, 170, 0.2);
+        }
+        
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .boundaries {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AQA A Level Art and Design Grade Calculator</h1>
+        
+        <form class="calculator-form" id="gradeCalculatorForm">
+            <div class="form-group">
+                <label for="moduleSelect">Select your Art & Design Module:</label>
+                <select id="moduleSelect" required>
+                    <option value="" disabled selected>-- Select Module --</option>
+                    <!-- Module options will be populated by JavaScript -->
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="component1">Component 1 Mark (out of 96):</label>
+                <input type="number" id="component1" min="0" max="96" required placeholder="Enter mark between 0-96">
+            </div>
+            
+            <div class="form-group">
+                <label for="component2">Component 2 Mark (out of 96):</label>
+                <input type="number" id="component2" min="0" max="96" required placeholder="Enter mark between 0-96">
+            </div>
+            
+            <button type="submit" id="calculateBtn">Calculate Grade</button>
+        </form>
+        
+        <div class="results" id="results">
+            <h2>Your Results</h2>
+            
+            <div class="result-item">
+                <span class="result-label">Component 1 (60%):</span>
+                <span id="scaledComp1"></span>
+            </div>
+            
+            <div class="result-item">
+                <span class="result-label">Component 2 (40%):</span>
+                <span id="scaledComp2"></span>
+            </div>
+            
+            <div class="result-item">
+                <span class="result-label">Total Mark (out of 480):</span>
+                <span id="totalMark"></span>
+            </div>
+            
+            <div class="grade" id="grade"></div>
+            
+            <div class="boundaries">
+                <div class="boundary lower-boundary">
+                    <h3>Grade Below</h3>
+                    <div id="lowerBoundary"></div>
+                </div>
+                
+                <div class="boundary upper-boundary">
+                    <h3>Grade Above</h3>
+                    <div id="upperBoundary"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>This calculator is based on AQA A Level Art and Design Grade Boundaries.</p>
+            <p>© Surrey Teaching 2025</p>
+        </div>
+    </div>
+    
+    <script>
+        // Grade boundaries data
+        const gradeCalculatorData = {
+          "modules": [
+            {
+              "code": 7205,
+              "title": "ART & DES ADV (3D DESIGN)",
+              "maxMark": 480,
+              "boundaries": {
+                "A*": 399,
+                "A": 370,
+                "B": 313,
+                "C": 257,
+                "D": 201,
+                "E": 145
+              }
+            },
+            {
+              "code": 7201,
+              "title": "ART & DES ADV (ART,CRAFT & DES)",
+              "maxMark": 480,
+              "boundaries": {
+                "A*": 399,
+                "A": 370,
+                "B": 313,
+                "C": 257,
+                "D": 201,
+                "E": 145
+              }
+            },
+            {
+              "code": 7202,
+              "title": "ART & DES ADV (FINE ART)",
+              "maxMark": 480,
+              "boundaries": {
+                "A*": 399,
+                "A": 370,
+                "B": 313,
+                "C": 257,
+                "D": 201,
+                "E": 145
+              }
+            },
+            {
+              "code": 7203,
+              "title": "ART & DES ADV (GRAPHIC COM)",
+              "maxMark": 480,
+              "boundaries": {
+                "A*": 399,
+                "A": 370,
+                "B": 313,
+                "C": 257,
+                "D": 201,
+                "E": 145
+              }
+            },
+            {
+              "code": 7206,
+              "title": "ART & DES ADV (PHOTOGRAPHY)",
+              "maxMark": 480,
+              "boundaries": {
+                "A*": 409,
+                "A": 390,
+                "B": 336,
+                "C": 282,
+                "D": 228,
+                "E": 175
+              }
+            },
+            {
+              "code": 7204,
+              "title": "ART & DES ADV (TEXTILE DESIGN)",
+              "maxMark": 480,
+              "boundaries": {
+                "A*": 399,
+                "A": 370,
+                "B": 313,
+                "C": 257,
+                "D": 201,
+                "E": 145
+              }
+            }
+          ]
+        };
+
+        // DOM Elements
+        const moduleSelect = document.getElementById('moduleSelect');
+        const component1Input = document.getElementById('component1');
+        const component2Input = document.getElementById('component2');
+        const form = document.getElementById('gradeCalculatorForm');
+        const results = document.getElementById('results');
+        const scaledComp1Element = document.getElementById('scaledComp1');
+        const scaledComp2Element = document.getElementById('scaledComp2');
+        const totalMarkElement = document.getElementById('totalMark');
+        const gradeElement = document.getElementById('grade');
+        const lowerBoundaryElement = document.getElementById('lowerBoundary');
+        const upperBoundaryElement = document.getElementById('upperBoundary');
+
+        // Populate module select options
+        function populateModuleOptions() {
+            gradeCalculatorData.modules.forEach(module => {
+                const option = document.createElement('option');
+                option.value = module.code;
+                option.textContent = `${module.code} - ${module.title}`;
+                moduleSelect.appendChild(option);
+            });
+        }
+
+        // Calculate grade based on total mark and module boundaries
+        function calculateGrade(totalMark, moduleCode) {
+            const module = gradeCalculatorData.modules.find(m => m.code === parseInt(moduleCode, 10));
+            if (!module) {
+                console.error("Module not found:", moduleCode);
+                return { grade: "Error", upperGrade: null, upperBoundary: null, lowerGrade: null, lowerBoundary: null };
+            }
+
+            const boundaries = module.boundaries;
+            const grades = Object.keys(boundaries);
+            
+            // Sort grades from highest to lowest
+            grades.sort((a, b) => {
+                // Handle A* special case
+                if (a === 'A*') return -1;
+                if (b === 'A*') return 1;
+                return b.localeCompare(a);
+            });
+            
+            // Find the grade
+            let achievedGrade = 'U'; // Default to U (unclassified)
+            let upperGrade = null;
+            let lowerGrade = null;
+            let upperBoundary = null;
+            let lowerBoundary = null;
+            
+            for (let i = 0; i < grades.length; i++) {
+                const grade = grades[i];
+                const boundary = boundaries[grade];
+                
+                if (totalMark >= boundary) {
+                    achievedGrade = grade;
+                    
+                    // Set upper grade/boundary if it's not the highest grade
+                    if (i > 0) {
+                        upperGrade = grades[i-1];
+                        upperBoundary = boundaries[upperGrade];
+                    }
+                    
+                    // Set lower grade/boundary if it's not the lowest grade
+                    if (i < grades.length - 1) {
+                        lowerGrade = grades[i+1];
+                        lowerBoundary = boundaries[lowerGrade];
+                    } else {
+                        // If it's the lowest passing grade, show U as lower
+                        lowerGrade = 'U';
+                        lowerBoundary = 0;
+                    }
+                    
+                    break;
+                }
+            }
+            
+            // If no grade found (below lowest boundary), set U and show the lowest grade as upper
+            if (achievedGrade === 'U') {
+                upperGrade = grades[grades.length - 1];
+                upperBoundary = boundaries[upperGrade];
+                lowerGrade = null;
+                lowerBoundary = null;
+            }
+            
+            return {
+                grade: achievedGrade,
+                upperGrade,
+                upperBoundary,
+                lowerGrade,
+                lowerBoundary
+            };
+        }
+
+        // Handle form submission
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form values
+            const moduleCode = moduleSelect.value;
+            const comp1Mark = parseInt(component1Input.value);
+            const comp2Mark = parseInt(component2Input.value);
+            
+            // Validate inputs
+            if (!moduleCode || isNaN(comp1Mark) || isNaN(comp2Mark)) {
+                alert('Please fill in all fields with valid values');
+                return;
+            }
+            
+            if (comp1Mark < 0 || comp1Mark > 96 || comp2Mark < 0 || comp2Mark > 96) {
+                alert('Component marks must be between 0 and 96');
+                return;
+            }
+            
+            // Calculate scaled marks
+            const scaledComp1 = comp1Mark * 3;
+            const scaledComp2 = comp2Mark * 2;
+            const totalMark = scaledComp1 + scaledComp2;
+            
+            // Get grade information
+            const gradeInfo = calculateGrade(totalMark, moduleCode);
+            
+            // Display results
+            scaledComp1Element.textContent = `${comp1Mark} × 3 = ${scaledComp1}`;
+            scaledComp2Element.textContent = `${comp2Mark} × 2 = ${scaledComp2}`;
+            totalMarkElement.textContent = `${totalMark} / 480`;
+            gradeElement.textContent = `Grade: ${gradeInfo.grade}`;
+            
+            // Show boundaries
+            if (gradeInfo.lowerGrade) {
+                lowerBoundaryElement.innerHTML = `
+                    <p><strong>${gradeInfo.lowerGrade}</strong></p>
+                    <p>${gradeInfo.lowerBoundary} marks needed</p>
+                    <p>(${totalMark - gradeInfo.lowerBoundary} marks above)</p>
+                `;
+            } else {
+                lowerBoundaryElement.innerHTML = '<p>No lower grade</p>';
+            }
+            
+            if (gradeInfo.upperGrade) {
+                upperBoundaryElement.innerHTML = `
+                    <p><strong>${gradeInfo.upperGrade}</strong></p>
+                    <p>${gradeInfo.upperBoundary} marks needed</p>
+                    <p>(${gradeInfo.upperBoundary - totalMark} marks to go)</p>
+                `;
+            } else {
+                upperBoundaryElement.innerHTML = '<p>No higher grade</p>';
+            }
+            
+            // Show results section
+            results.classList.add('visible');
+        });
+
+        // Initialize the app - populate module options when page loads
+        populateModuleOptions();
+    </script>
+</body>
+</html>
